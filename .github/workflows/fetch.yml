@@ -38,7 +38,12 @@ jobs:
       - name: Analyze and publish summary JSON
         run: |
           python scripts/analyze_and_publish.py
-          
+
+      - name: Duplicate JSON for Raw access
+        run: |
+          cp docs/eth_summary.json eth_summary.json
+          git add eth_summary.json
+
       - name: Configure git and push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
