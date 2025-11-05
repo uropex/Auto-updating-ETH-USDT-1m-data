@@ -33,10 +33,12 @@ jobs:
       - name: Fetch and save CSV
         run: |
           python scripts/fetch_eth.py
+          
 # 既存のjobs.fetch.stepsの末尾付近に、Commit前に挿入
       - name: Analyze and publish summary JSON
         run: |
           python scripts/analyze_and_publish.py
+          
       - name: Configure git and push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
