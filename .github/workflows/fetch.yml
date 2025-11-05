@@ -40,12 +40,29 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 念のため最新を取得（main が進んでいても対応できるように）
+          git fetch origin main
+
+          # 変更をステージング & 一旦コミット
           git add docs/*
           if ! git diff --cached --quiet; then
             git commit -m "auto: update CSV ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))"
-            # 念のため、トークン付きURLで origin を上書きして push
-            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-            git push origin HEAD:main
           else
-            echo "No changes."
+            echo "No changes to commit."
           fi
+
+          # main を最新に合わせてリベース（競合ほぼ出ません）
+          git pull --rebase origin main || true
+
+          # トークン付きURLで安全に push
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+
+          # 競合がなければ通常 push、もし再び進んでいたら最終手段で lease 付き force
+          if git push origin HEAD:main; then
+            echo "Pushed normally."
+          else
+            echo "Non-fast-forward, trying force-with-lease..."
+            git push --force-with-lease origin HEAD:main
+          fi
+
