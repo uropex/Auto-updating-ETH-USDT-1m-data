@@ -143,6 +143,10 @@ def main():
     with open(OUT_HTML, "w", encoding="utf-8") as f:
         f.write(html)
 
+    import shutil
+shutil.copyfile(OUT_JSON, "eth_summary.json")
+
+
     print("✅ Wrote:", OUT_JSON, "and", OUT_HTML)
 
 if __name__ == "__main__":
