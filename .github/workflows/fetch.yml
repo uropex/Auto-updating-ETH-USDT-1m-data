@@ -1,0 +1,34 @@
+name: Fetch ETH 1m klines every 15m
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+      - name: Fetch and save CSV
+        run: |
+          python scripts/fetch_eth.py
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/*
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: update CSV ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))"
+            git push
+          else
+            echo "No changes."
+          fi
